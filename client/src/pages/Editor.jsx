@@ -12,7 +12,8 @@ export default function Editor() {
 
   const [script, setScript] = useState(null);
   const [error, setError] = useState(null);
-  const [saveState, setSaveState] = useState("idle"); // idle | saving | saved
+  const [saveError, setSaveError] = useState(null);
+  const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
   const [tagInput, setTagInput] = useState("");
   const [showNotes, setShowNotes] = useState(true);
 
@@ -32,8 +33,15 @@ export default function Editor() {
   const persist = useCallback((data) => {
     setSaveState("saving");
     updateScript(id, data)
-      .then(() => setSaveState("saved"))
-      .catch((e) => setError(e.message));
+      .then((saved) => {
+        setSaveState("saved");
+        setSaveError(null);
+        latest.current = saved;
+      })
+      .catch((e) => {
+        setSaveState("error");
+        setSaveError(e.message);
+      });
   }, [id]);
 
   function scheduleSave(next) {
@@ -118,7 +126,7 @@ export default function Editor() {
           </Link>
           <div className="flex items-center gap-4 text-xs text-gray-600">
             <span>{wordCount} words</span>
-            <SaveIndicator state={saveState} />
+            <SaveIndicator state={saveState} error={saveError} />
             <button
               onClick={() => setShowNotes((v) => !v)}
               className="text-gray-500 hover:text-gray-200"
@@ -270,8 +278,14 @@ export default function Editor() {
   );
 }
 
-function SaveIndicator({ state }) {
+function SaveIndicator({ state, error }) {
   if (state === "saving") return <span className="text-amber-500">Saving…</span>;
   if (state === "saved") return <span className="text-emerald-500">Saved</span>;
+  if (state === "error")
+    return (
+      <span className="text-rose-400" title={error || "Save failed"}>
+        Couldn't save
+      </span>
+    );
   return <span className="text-gray-700">·</span>;
 }

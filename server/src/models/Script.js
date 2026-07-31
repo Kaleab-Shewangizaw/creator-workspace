@@ -6,9 +6,9 @@ const scriptSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
       trim: true,
       default: "Untitled script",
+      set: (v) => (v && v.trim() ? v : "Untitled script"),
     },
     content: {
       type: String,
