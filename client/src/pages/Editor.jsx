@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getScript, updateScript, deleteScript } from "../api/client.js";
-import { STATUSES } from "../constants.js";
+import { STATUSES, estimateRuntime } from "../constants.js";
 import { ErrorBanner } from "./Dashboard.jsx";
 
 const SAVE_DELAY = 800;
@@ -116,45 +116,52 @@ export default function Editor() {
   }
 
   const wordCount = (script.content || "").trim().split(/\s+/).filter(Boolean).length;
+  const meta = STATUSES.find((s) => s.value === script.status) || STATUSES[0];
 
   return (
     <div className="flex h-full">
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="border-b border-white/10 px-8 py-4 flex items-center justify-between">
-          <Link to="/scripts" className="text-sm text-gray-500 hover:text-gray-300">
+        <div className="border-b border-hairline px-8 py-4 flex items-center justify-between">
+          <Link to="/scripts" className="text-sm text-paper-faint hover:text-tide transition-colors">
             ← All scripts
           </Link>
-          <div className="flex items-center gap-4 text-xs text-gray-600">
-            <span>{wordCount} words</span>
+          <div className="flex items-center gap-4 text-xs font-mono text-paper-faint">
+            <span className="tabular">
+              {wordCount}w · {estimateRuntime(wordCount)}
+            </span>
             <SaveIndicator state={saveState} error={saveError} />
             <button
               onClick={() => setShowNotes((v) => !v)}
-              className="text-gray-500 hover:text-gray-200"
+              className="font-sans text-paper-faint hover:text-paper transition-colors"
             >
               {showNotes ? "Hide notes" : "Show notes"}
             </button>
-            <button onClick={handleDelete} className="text-gray-600 hover:text-rose-400">
+            <button
+              onClick={handleDelete}
+              className="font-sans text-paper-faint hover:text-ember transition-colors"
+            >
               Delete
             </button>
           </div>
         </div>
 
-        <div className="px-8 py-6 flex-1 flex flex-col min-h-0">
+        <div className="px-8 py-6 flex-1 flex flex-col min-h-0 max-w-[760px] w-full mx-auto">
           <input
             value={script.title}
             onChange={(e) => update("title", e.target.value)}
             placeholder="Untitled script"
-            className="text-2xl font-semibold bg-transparent text-white placeholder:text-gray-700 mb-4 w-full"
+            className="text-2xl font-semibold bg-transparent text-paper placeholder:text-paper-faint/50 mb-4 w-full"
           />
 
-          <div className="flex items-center gap-3 mb-5 flex-wrap">
+          <div className="flex items-center gap-3 mb-6 flex-wrap">
             <select
               value={script.status}
               onChange={(e) => update("status", e.target.value)}
-              className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm text-gray-300"
+              className="rounded-md border px-3 py-1.5 text-sm bg-panel"
+              style={{ color: meta.color, borderColor: meta.color + "40" }}
             >
               {STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>
+                <option key={s.value} value={s.value} className="text-paper-dim bg-panel">
                   {s.label}
                 </option>
               ))}
@@ -164,10 +171,10 @@ export default function Editor() {
               {script.tags.map((t) => (
                 <span
                   key={t}
-                  className="flex items-center gap-1 text-xs rounded-full bg-white/5 px-2 py-1 text-gray-400"
+                  className="flex items-center gap-1 text-xs rounded-full bg-panel px-2 py-1 text-paper-dim font-mono"
                 >
                   {t}
-                  <button onClick={() => removeTag(t)} className="text-gray-600 hover:text-rose-400">
+                  <button onClick={() => removeTag(t)} className="text-paper-faint hover:text-ember">
                     ×
                   </button>
                 </span>
@@ -183,7 +190,7 @@ export default function Editor() {
                 }}
                 onBlur={addTag}
                 placeholder="+ tag"
-                className="text-xs bg-transparent placeholder:text-gray-700 text-gray-300 w-16 px-1 py-1"
+                className="text-xs font-mono bg-transparent placeholder:text-paper-faint/60 text-paper-dim w-16 px-1 py-1"
               />
             </div>
           </div>
@@ -192,15 +199,15 @@ export default function Editor() {
             value={script.content}
             onChange={(e) => update("content", e.target.value)}
             placeholder="Start writing your script…"
-            className="flex-1 w-full resize-none bg-transparent text-gray-200 leading-relaxed text-[15px] placeholder:text-gray-700"
+            className="flex-1 w-full resize-none bg-transparent text-paper font-mono leading-[1.8] text-[15px] tracking-[0.01em] placeholder:text-paper-faint/50"
           />
         </div>
       </div>
 
       {showNotes && (
-        <aside className="w-80 shrink-0 border-l border-white/10 overflow-y-auto p-6 space-y-6">
+        <aside className="w-80 shrink-0 border-l border-hairline bg-panel-soft overflow-y-auto p-6 space-y-7">
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+            <h3 className="font-mono text-[10px] font-medium text-paper-faint uppercase tracking-widest mb-2">
               Title ideas
             </h3>
             <div className="space-y-2">
@@ -210,11 +217,11 @@ export default function Editor() {
                     value={t}
                     onChange={(e) => setTitleIdea(i, e.target.value)}
                     placeholder={`Title idea ${i + 1}`}
-                    className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-sm text-gray-300 placeholder:text-gray-700"
+                    className="flex-1 rounded-md border border-hairline bg-panel px-2 py-1.5 text-sm text-paper-dim placeholder:text-paper-faint"
                   />
                   <button
                     onClick={() => removeTitleIdea(i)}
-                    className="text-gray-600 hover:text-rose-400 text-sm px-1"
+                    className="text-paper-faint hover:text-ember text-sm px-1"
                   >
                     ×
                   </button>
@@ -222,7 +229,7 @@ export default function Editor() {
               ))}
               <button
                 onClick={addTitleIdea}
-                className="text-xs text-gray-500 hover:text-gray-300"
+                className="text-xs text-paper-faint hover:text-tide transition-colors"
               >
                 + Add title idea
               </button>
@@ -230,7 +237,7 @@ export default function Editor() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+            <h3 className="font-mono text-[10px] font-medium text-paper-faint uppercase tracking-widest mb-2">
               Thumbnail notes
             </h3>
             <textarea
@@ -238,12 +245,12 @@ export default function Editor() {
               onChange={(e) => updateNotes("thumbnailNotes", e.target.value)}
               placeholder="Text overlay, imagery, colors…"
               rows={3}
-              className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-sm text-gray-300 placeholder:text-gray-700 resize-none"
+              className="w-full rounded-md border border-hairline bg-panel px-2 py-1.5 text-sm text-paper-dim placeholder:text-paper-faint resize-none"
             />
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+            <h3 className="font-mono text-[10px] font-medium text-paper-faint uppercase tracking-widest mb-2">
               SEO tags
             </h3>
             <textarea
@@ -256,12 +263,12 @@ export default function Editor() {
               }
               placeholder="comma, separated, keywords"
               rows={2}
-              className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-sm text-gray-300 placeholder:text-gray-700 resize-none"
+              className="w-full rounded-md border border-hairline bg-panel px-2 py-1.5 text-sm text-paper-dim placeholder:text-paper-faint resize-none"
             />
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+            <h3 className="font-mono text-[10px] font-medium text-paper-faint uppercase tracking-widest mb-2">
               Hook / opening notes
             </h3>
             <textarea
@@ -269,7 +276,7 @@ export default function Editor() {
               onChange={(e) => updateNotes("hooks", e.target.value)}
               placeholder="How does the first 10 seconds grab attention?"
               rows={4}
-              className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-sm text-gray-300 placeholder:text-gray-700 resize-none"
+              className="w-full rounded-md border border-hairline bg-panel px-2 py-1.5 text-sm text-paper-dim placeholder:text-paper-faint resize-none"
             />
           </div>
         </aside>
@@ -279,13 +286,24 @@ export default function Editor() {
 }
 
 function SaveIndicator({ state, error }) {
-  if (state === "saving") return <span className="text-amber-500">Saving…</span>;
-  if (state === "saved") return <span className="text-emerald-500">Saved</span>;
-  if (state === "error")
+  const dot = "inline-block h-1.5 w-1.5 rounded-full";
+  if (state === "saving")
     return (
-      <span className="text-rose-400" title={error || "Save failed"}>
-        Couldn't save
+      <span className="flex items-center gap-1.5 text-amber-500">
+        <span className={`${dot} bg-amber-500 animate-pulse`} /> Saving…
       </span>
     );
-  return <span className="text-gray-700">·</span>;
+  if (state === "saved")
+    return (
+      <span className="flex items-center gap-1.5 text-tide">
+        <span className={`${dot} bg-tide`} /> Saved
+      </span>
+    );
+  if (state === "error")
+    return (
+      <span className="flex items-center gap-1.5 text-ember" title={error || "Save failed"}>
+        <span className={`${dot} bg-ember`} /> Couldn't save
+      </span>
+    );
+  return <span className="text-paper-faint">·</span>;
 }

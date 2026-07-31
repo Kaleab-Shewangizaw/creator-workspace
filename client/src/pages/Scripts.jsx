@@ -46,12 +46,12 @@ export default function Scripts() {
     <div className="p-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Scripts</h1>
-          <p className="text-gray-500 text-sm mt-1">Every script, searchable in one place.</p>
+          <h1 className="text-2xl font-semibold text-paper tracking-tight">Scripts</h1>
+          <p className="text-paper-faint text-sm mt-1">Every script, searchable in one place.</p>
         </div>
         <button
           onClick={handleNewScript}
-          className="rounded-lg bg-rose-500 hover:bg-rose-400 transition-colors px-4 py-2 text-sm font-medium text-white"
+          className="rounded-md bg-ember hover:bg-ember-dim transition-colors px-4 py-2 text-sm font-medium text-ink"
         >
           + New script
         </button>
@@ -62,12 +62,12 @@ export default function Scripts() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search title, content, tags…"
-          className="flex-1 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200 placeholder:text-gray-600"
+          className="flex-1 rounded-md border border-hairline bg-panel px-3 py-2 text-sm text-paper placeholder:text-paper-faint focus:border-tide-dim transition-colors"
         />
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-300"
+          className="rounded-md border border-hairline bg-panel px-3 py-2 text-sm text-paper-dim"
         >
           <option value="">All stages</option>
           {STATUSES.map((s) => (
@@ -79,7 +79,7 @@ export default function Scripts() {
         <select
           value={tag}
           onChange={(e) => setTag(e.target.value)}
-          className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-300"
+          className="rounded-md border border-hairline bg-panel px-3 py-2 text-sm text-paper-dim"
         >
           <option value="">All tags</option>
           {tags.map((t) => (
@@ -92,34 +92,34 @@ export default function Scripts() {
 
       {error && <ErrorBanner error={error} />}
 
-      {!error && loading && <div className="text-gray-500 text-sm">Loading…</div>}
+      {!error && loading && <div className="text-paper-faint font-mono text-sm">Loading…</div>}
 
       {!error && !loading && scripts.length === 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-10 text-center text-gray-500 text-sm">
+        <div className="rounded-md border border-hairline bg-panel-soft p-10 text-center text-paper-faint text-sm">
           No scripts match. Try clearing filters or create a new one.
         </div>
       )}
 
       {!error && !loading && scripts.length > 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden">
-          <ul className="divide-y divide-white/10">
+        <div className="rounded-md border border-hairline bg-panel overflow-hidden">
+          <ul className="divide-y divide-hairline">
             {scripts.map((s) => {
               const meta = statusMeta(s.status);
               return (
                 <li key={s._id}>
                   <Link
                     to={`/scripts/${s._id}`}
-                    className="flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors group"
+                    className="flex items-center justify-between px-5 py-4 hover:bg-panel-soft transition-colors group"
                   >
                     <div className="min-w-0">
-                      <div className="text-sm text-gray-200 truncate">
+                      <div className="text-sm text-paper truncate">
                         {s.title || "Untitled script"}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         {(s.tags || []).slice(0, 4).map((t) => (
                           <span
                             key={t}
-                            className="text-xs rounded-full bg-white/5 px-2 py-0.5 text-gray-500"
+                            className="text-xs rounded-full bg-panel-soft px-2 py-0.5 text-paper-faint"
                           >
                             {t}
                           </span>
@@ -127,19 +127,21 @@ export default function Scripts() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4 shrink-0">
-                      <span className="text-xs text-gray-600">{s.wordCount || 0} words</span>
+                      <span className="text-xs text-paper-faint font-mono tabular">
+                        {s.wordCount || 0} words
+                      </span>
                       <span
-                        className="text-xs px-2 py-0.5 rounded-full"
-                        style={{ color: meta.color, background: meta.color + "22" }}
+                        className="text-xs px-2 py-0.5 rounded-full font-mono"
+                        style={{ color: meta.color, background: meta.color + "1a" }}
                       >
                         {meta.label}
                       </span>
-                      <span className="text-xs text-gray-600 w-20 text-right">
+                      <span className="text-xs text-paper-faint font-mono tabular w-20 text-right">
                         {new Date(s.updatedAt).toLocaleDateString()}
                       </span>
                       <button
                         onClick={(e) => handleDelete(e, s._id)}
-                        className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-rose-400 text-xs transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 text-paper-faint hover:text-ember text-xs transition-opacity"
                       >
                         Delete
                       </button>

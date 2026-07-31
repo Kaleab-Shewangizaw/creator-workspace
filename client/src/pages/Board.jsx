@@ -46,14 +46,14 @@ export default function Board() {
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">Pipeline</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <h1 className="text-2xl font-semibold text-paper tracking-tight">Pipeline</h1>
+        <p className="text-paper-faint text-sm mt-1">
           Drag cards across stages as each video moves forward.
         </p>
       </div>
 
       {loading ? (
-        <div className="text-gray-500">Loading…</div>
+        <div className="text-paper-faint font-mono text-sm">Loading…</div>
       ) : (
         <div className="grid grid-cols-5 gap-4">
           {STATUSES.map((col) => {
@@ -67,22 +67,25 @@ export default function Board() {
                   if (draggingId) moveScript(draggingId, col.value);
                   setDraggingId(null);
                 }}
-                className="rounded-xl border border-white/10 bg-white/[0.02] flex flex-col min-h-[60vh]"
+                className="rounded-md border border-hairline bg-panel-soft flex flex-col min-h-[60vh]"
               >
-                <div className="px-3 py-3 border-b border-white/10 flex items-center justify-between">
+                <div className="h-0.5 rounded-t-md" style={{ background: col.color }} />
+                <div className="px-3 py-3 border-b border-hairline flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span
-                      className="h-2 w-2 rounded-full"
+                      className="h-2 w-2 rounded-full shrink-0"
                       style={{ background: col.color }}
                     />
-                    <span className="text-xs font-medium text-gray-300">
+                    <span className="text-xs font-medium text-paper-dim">
                       {col.label}
                     </span>
-                    <span className="text-xs text-gray-600">{items.length}</span>
+                    <span className="text-xs font-mono tabular text-paper-faint">
+                      {items.length}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleNewScript(col.value)}
-                    className="text-gray-500 hover:text-gray-200 text-sm leading-none"
+                    className="text-paper-faint hover:text-ember text-sm leading-none transition-colors"
                     title="New script in this stage"
                   >
                     +
@@ -96,15 +99,15 @@ export default function Board() {
                       to={`/scripts/${s._id}`}
                       draggable
                       onDragStart={() => setDraggingId(s._id)}
-                      className="block rounded-lg border border-white/10 bg-[#15171d] p-3 hover:border-white/25 transition-colors cursor-grab active:cursor-grabbing"
+                      className="block rounded-md border border-hairline bg-panel p-3 hover:border-tide-dim transition-colors cursor-grab active:cursor-grabbing"
                     >
-                      <div className="text-sm text-gray-200 mb-2 line-clamp-2">
+                      <div className="text-sm text-paper mb-2 line-clamp-2">
                         {s.title || "Untitled script"}
                       </div>
-                      <div className="flex items-center justify-between text-xs text-gray-600">
-                        <span>{s.wordCount || 0} words</span>
+                      <div className="flex items-center justify-between text-xs text-paper-faint font-mono tabular">
+                        <span>{s.wordCount || 0}w</span>
                         {s.tags?.[0] && (
-                          <span className="rounded-full bg-white/5 px-2 py-0.5 text-gray-400">
+                          <span className="rounded-full bg-panel-soft px-2 py-0.5 text-paper-dim font-sans">
                             {s.tags[0]}
                           </span>
                         )}
@@ -112,7 +115,7 @@ export default function Board() {
                     </Link>
                   ))}
                   {items.length === 0 && (
-                    <div className="text-xs text-gray-700 text-center py-6">
+                    <div className="text-xs text-paper-faint/60 text-center py-6">
                       Nothing here
                     </div>
                   )}

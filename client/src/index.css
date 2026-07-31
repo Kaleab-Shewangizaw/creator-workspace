@@ -1,7 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "IBM Plex Sans", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Warm, low-lit "editing bay" surfaces — never cool/blue-black */
+  --color-ink: #14120f;
+  --color-panel: #1b1815;
+  --color-panel-soft: #201c18;
+  --color-hairline: #322c25;
+  --color-hairline-soft: #262119;
+
+  /* Warm paper text, not pure white/gray */
+  --color-paper: #ede7dd;
+  --color-paper-dim: #a39a8a;
+  --color-paper-faint: #6b6459;
+
+  /* Signature pair, borrowed from film grading: ember (hot/record) + tide (cool/calm) */
+  --color-ember: #ff5a36;
+  --color-ember-dim: #b8431f;
+  --color-ember-soft: #3a2015;
+  --color-tide: #4fa8a0;
+  --color-tide-dim: #326763;
+  --color-tide-soft: #16211f;
 }
 
 html,
@@ -12,8 +33,8 @@ body,
 
 body {
   margin: 0;
-  background-color: #0f1115;
-  color: #e5e7eb;
+  background-color: var(--color-ink);
+  color: var(--color-paper);
   font-family: var(--font-sans);
 }
 
@@ -22,7 +43,7 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2d36;
+  background: var(--color-hairline);
   border-radius: 8px;
 }
 ::-webkit-scrollbar-track {
@@ -32,4 +53,14 @@ body {
 textarea:focus,
 input:focus {
   outline: none;
+}
+
+.film-edge {
+  background-image: radial-gradient(circle at 3px 3px, var(--color-hairline) 1.6px, transparent 2px);
+  background-size: 100% 14px;
+  background-repeat: repeat-y;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
