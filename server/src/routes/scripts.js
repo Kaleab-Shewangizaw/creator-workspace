@@ -61,7 +61,24 @@ router.get("/stats", async (req, res) => {
         updatedAt: s.updatedAt,
       }));
 
-    res.json({ totalScripts, totalWords, byStatus, recent });
+    const now = new Date();
+    const upcoming = scripts
+      .filter((s) => s.publishDate && new Date(s.publishDate) >= now)
+      .sort((a, b) => new Date(a.publishDate) - new Date(b.publishDate))
+      .slice(0, 5)
+      .map((s) => ({
+        _id: s._id,
+        title: s.title,
+        status: s.status,
+        publishDate: s.publishDate,
+      }));
+
+    const readyToPublish = scripts.filter((s) => {
+      const checklist = s.notes?.checklist || [];
+      return s.status !== "published" && checklist.length > 0 && checklist.every((c) => c.done);
+    }).length;
+
+    res.json({ totalScripts, totalWords, byStatus, recent, upcoming, readyToPublish });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

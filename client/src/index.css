@@ -4,25 +4,29 @@
   --font-sans: "IBM Plex Sans", system-ui, "Segoe UI", Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  /* Warm, low-lit "editing bay" surfaces — never cool/blue-black */
-  --color-ink: #14120f;
-  --color-panel: #1b1815;
-  --color-panel-soft: #201c18;
-  --color-hairline: #322c25;
-  --color-hairline-soft: #262119;
+  /* Dark, but cool-lit and alive — a studio at night, not a cave */
+  --color-ink: #0b0d16;
+  --color-panel: #151827;
+  --color-panel-soft: #1b1f33;
+  --color-hairline: #2e3350;
+  --color-hairline-soft: #22263c;
 
-  /* Warm paper text, not pure white/gray */
-  --color-paper: #ede7dd;
-  --color-paper-dim: #a39a8a;
-  --color-paper-faint: #6b6459;
+  --color-paper: #f5f3ff;
+  --color-paper-dim: #ada8c7;
+  --color-paper-faint: #726d8f;
 
-  /* Signature pair, borrowed from film grading: ember (hot/record) + tide (cool/calm) */
-  --color-ember: #ff5a36;
-  --color-ember-dim: #b8431f;
-  --color-ember-soft: #3a2015;
-  --color-tide: #4fa8a0;
-  --color-tide-dim: #326763;
-  --color-tide-soft: #16211f;
+  /* Signature quartet — one hue per stage of momentum */
+  --color-spark: #2f6fed;
+  --color-spark-dim: #1d4ed8;
+  --color-spark-soft: #14213d;
+  --color-flare: #ff4d6d;
+  --color-flare-dim: #d6335a;
+  --color-flare-soft: #331823;
+  --color-tide: #22d3ee;
+  --color-tide-dim: #0ea5b7;
+  --color-tide-soft: #132632;
+  --color-zest: #a3e635;
+  --color-zest-dim: #84cc16;
 }
 
 html,
@@ -64,3 +68,4 @@ input:focus {
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+

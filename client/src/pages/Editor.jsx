@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getScript, updateScript, deleteScript } from "../api/client.js";
-import { STATUSES, estimateRuntime } from "../constants.js";
+import { STATUSES, estimateRuntime, DEFAULT_CHECKLIST, checklistProgress } from "../constants.js";
 import { ErrorBanner } from "./Dashboard.jsx";
 
 const SAVE_DELAY = 800;
@@ -97,6 +97,30 @@ export default function Editor() {
     updateNotes("titleIdeas", script.notes.titleIdeas.filter((_, idx) => idx !== i));
   }
 
+  function checklistItems() {
+    return script.notes.checklist?.length
+      ? script.notes.checklist
+      : DEFAULT_CHECKLIST.map((label) => ({ label, done: false }));
+  }
+
+  function toggleChecklistItem(i) {
+    const next = checklistItems().map((c, idx) => (idx === i ? { ...c, done: !c.done } : c));
+    updateNotes("checklist", next);
+  }
+
+  function addChecklistItem() {
+    updateNotes("checklist", [...checklistItems(), { label: "", done: false }]);
+  }
+
+  function setChecklistLabel(i, value) {
+    const next = checklistItems().map((c, idx) => (idx === i ? { ...c, label: value } : c));
+    updateNotes("checklist", next);
+  }
+
+  function removeChecklistItem(i) {
+    updateNotes("checklist", checklistItems().filter((_, idx) => idx !== i));
+  }
+
   async function handleDelete() {
     if (!confirm("Delete this script? This can't be undone.")) return;
     await deleteScript(id);
@@ -112,11 +136,12 @@ export default function Editor() {
   }
 
   if (!script) {
-    return <div className="p-10 text-gray-500">Loading script…</div>;
+    return <div className="p-10 text-paper-faint font-mono text-sm">Loading script…</div>;
   }
 
   const wordCount = (script.content || "").trim().split(/\s+/).filter(Boolean).length;
   const meta = STATUSES.find((s) => s.value === script.status) || STATUSES[0];
+  const progress = checklistProgress(script.notes);
 
   return (
     <div className="flex h-full">
@@ -129,6 +154,12 @@ export default function Editor() {
             <span className="tabular">
               {wordCount}w · {estimateRuntime(wordCount)}
             </span>
+            <span
+              className={`tabular ${progress.total > 0 && progress.done === progress.total ? "text-zest" : ""}`}
+              title="Publish checklist progress"
+            >
+              {progress.done}/{progress.total} ready
+            </span>
             <SaveIndicator state={saveState} error={saveError} />
             <button
               onClick={() => setShowNotes((v) => !v)}
@@ -138,7 +169,7 @@ export default function Editor() {
             </button>
             <button
               onClick={handleDelete}
-              className="font-sans text-paper-faint hover:text-ember transition-colors"
+              className="font-sans text-paper-faint hover:text-flare transition-colors"
             >
               Delete
             </button>
@@ -167,6 +198,18 @@ export default function Editor() {
               ))}
             </select>
 
+            <label className="flex items-center gap-1.5 rounded-md border border-hairline bg-panel px-3 py-1.5 text-sm text-paper-dim">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-paper-faint">
+                Publish
+              </span>
+              <input
+                type="date"
+                value={script.publishDate ? script.publishDate.slice(0, 10) : ""}
+                onChange={(e) => update("publishDate", e.target.value ? e.target.value : null)}
+                className="bg-transparent text-paper-dim tabular"
+              />
+            </label>
+
             <div className="flex items-center gap-1.5 flex-wrap">
               {script.tags.map((t) => (
                 <span
@@ -174,7 +217,7 @@ export default function Editor() {
                   className="flex items-center gap-1 text-xs rounded-full bg-panel px-2 py-1 text-paper-dim font-mono"
                 >
                   {t}
-                  <button onClick={() => removeTag(t)} className="text-paper-faint hover:text-ember">
+                  <button onClick={() => removeTag(t)} className="text-paper-faint hover:text-flare">
                     ×
                   </button>
                 </span>
@@ -221,7 +264,7 @@ export default function Editor() {
                   />
                   <button
                     onClick={() => removeTitleIdea(i)}
-                    className="text-paper-faint hover:text-ember text-sm px-1"
+                    className="text-paper-faint hover:text-flare text-sm px-1"
                   >
                     ×
                   </button>
@@ -269,6 +312,19 @@ export default function Editor() {
 
           <div>
             <h3 className="font-mono text-[10px] font-medium text-paper-faint uppercase tracking-widest mb-2">
+              Description &amp; chapters
+            </h3>
+            <textarea
+              value={script.notes.description || ""}
+              onChange={(e) => updateNotes("description", e.target.value)}
+              placeholder={"YouTube description…\n\n0:00 Intro\n0:45 Chapter one"}
+              rows={5}
+              className="w-full rounded-md border border-hairline bg-panel px-2 py-1.5 text-sm text-paper-dim placeholder:text-paper-faint resize-none"
+            />
+          </div>
+
+          <div>
+            <h3 className="font-mono text-[10px] font-medium text-paper-faint uppercase tracking-widest mb-2">
               Hook / opening notes
             </h3>
             <textarea
@@ -279,13 +335,56 @@ export default function Editor() {
               className="w-full rounded-md border border-hairline bg-panel px-2 py-1.5 text-sm text-paper-dim placeholder:text-paper-faint resize-none"
             />
           </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-mono text-[10px] font-medium text-paper-faint uppercase tracking-widest">
+                Publish checklist
+              </h3>
+              <span className="text-xs font-mono tabular text-paper-faint">
+                {progress.done}/{progress.total}
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {checklistItems().map((c, i) => (
+                <div key={i} className="flex items-center gap-2 group">
+                  <input
+                    type="checkbox"
+                    checked={c.done}
+                    onChange={() => toggleChecklistItem(i)}
+                    className="accent-zest h-3.5 w-3.5 shrink-0"
+                  />
+                  <input
+                    value={c.label}
+                    onChange={(e) => setChecklistLabel(i, e.target.value)}
+                    placeholder={`Checklist item ${i + 1}`}
+                    className={`flex-1 bg-transparent text-sm px-1 py-1 placeholder:text-paper-faint ${
+                      c.done ? "text-paper-faint line-through" : "text-paper-dim"
+                    }`}
+                  />
+                  <button
+                    onClick={() => removeChecklistItem(i)}
+                    className="text-paper-faint hover:text-flare text-sm px-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={addChecklistItem}
+                className="text-xs text-paper-faint hover:text-tide transition-colors"
+              >
+                + Add checklist item
+              </button>
+            </div>
+          </div>
         </aside>
       )}
     </div>
   );
 }
 
-function SaveIndicator({ state, error }) {
+export function SaveIndicator({ state, error }) {
   const dot = "inline-block h-1.5 w-1.5 rounded-full";
   if (state === "saving")
     return (
@@ -301,8 +400,8 @@ function SaveIndicator({ state, error }) {
     );
   if (state === "error")
     return (
-      <span className="flex items-center gap-1.5 text-ember" title={error || "Save failed"}>
-        <span className={`${dot} bg-ember`} /> Couldn't save
+      <span className="flex items-center gap-1.5 text-flare" title={error || "Save failed"}>
+        <span className={`${dot} bg-flare`} /> Couldn't save
       </span>
     );
   return <span className="text-paper-faint">·</span>;

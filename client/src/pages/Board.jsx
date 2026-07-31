@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getScripts, createScript, updateScript } from "../api/client.js";
-import { STATUSES, statusMeta } from "../constants.js";
+import { STATUSES, statusMeta, checklistProgress } from "../constants.js";
 import { ErrorBanner } from "./Dashboard.jsx";
 
 export default function Board() {
@@ -85,7 +85,7 @@ export default function Board() {
                   </div>
                   <button
                     onClick={() => handleNewScript(col.value)}
-                    className="text-paper-faint hover:text-ember text-sm leading-none transition-colors"
+                    className="text-paper-faint hover:text-flare text-sm leading-none transition-colors"
                     title="New script in this stage"
                   >
                     +
@@ -93,27 +93,45 @@ export default function Board() {
                 </div>
 
                 <div className="flex-1 p-2 space-y-2">
-                  {items.map((s) => (
-                    <Link
-                      key={s._id}
-                      to={`/scripts/${s._id}`}
-                      draggable
-                      onDragStart={() => setDraggingId(s._id)}
-                      className="block rounded-md border border-hairline bg-panel p-3 hover:border-tide-dim transition-colors cursor-grab active:cursor-grabbing"
-                    >
-                      <div className="text-sm text-paper mb-2 line-clamp-2">
-                        {s.title || "Untitled script"}
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-paper-faint font-mono tabular">
-                        <span>{s.wordCount || 0}w</span>
-                        {s.tags?.[0] && (
-                          <span className="rounded-full bg-panel-soft px-2 py-0.5 text-paper-dim font-sans">
-                            {s.tags[0]}
+                  {items.map((s) => {
+                    const progress = checklistProgress(s.notes);
+                    return (
+                      <Link
+                        key={s._id}
+                        to={`/scripts/${s._id}`}
+                        draggable
+                        onDragStart={() => setDraggingId(s._id)}
+                        className="block rounded-md border border-hairline bg-panel p-3 hover:border-tide-dim transition-colors cursor-grab active:cursor-grabbing"
+                      >
+                        <div className="text-sm text-paper mb-2 line-clamp-2">
+                          {s.title || "Untitled script"}
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-paper-faint font-mono tabular mb-1.5">
+                          <span>{s.wordCount || 0}w</span>
+                          {s.tags?.[0] && (
+                            <span className="rounded-full bg-panel-soft px-2 py-0.5 text-paper-dim font-sans">
+                              {s.tags[0]}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] font-mono tabular">
+                          <span
+                            className={progress.done === progress.total ? "text-zest" : "text-paper-faint"}
+                          >
+                            {progress.done}/{progress.total} ready
                           </span>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
+                          {s.publishDate && (
+                            <span className="text-tide">
+                              {new Date(s.publishDate).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
                   {items.length === 0 && (
                     <div className="text-xs text-paper-faint/60 text-center py-6">
                       Nothing here

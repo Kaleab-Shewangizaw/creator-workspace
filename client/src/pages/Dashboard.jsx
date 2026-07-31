@@ -51,24 +51,25 @@ export default function Dashboard() {
         </div>
         <button
           onClick={handleNewScript}
-          className="rounded-md bg-ember hover:bg-ember-dim transition-colors px-4 py-2 text-sm font-medium text-ink"
+          className="rounded-md bg-spark hover:bg-spark-dim transition-colors px-4 py-2 text-sm font-semibold text-paper"
         >
           + New script
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="rounded-md border border-hairline bg-panel p-5 col-span-1">
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="rounded-md border border-spark-dim/40 bg-panel p-5 col-span-1">
           <div className="text-xs uppercase tracking-widest text-paper-faint font-mono mb-2">
             Est. runtime
           </div>
-          <div className="text-3xl font-mono tabular text-ember">
+          <div className="text-3xl font-mono tabular text-spark">
             {estimateRuntime(stats.totalWords)}
           </div>
           <div className="text-xs text-paper-faint mt-1">across all scripts, at ~140 wpm</div>
         </div>
         <StatCard label="Total scripts" value={stats.totalScripts} />
         <StatCard label="Total words written" value={stats.totalWords.toLocaleString()} />
+        <StatCard label="Ready to publish" value={stats.readyToPublish} accent="text-zest" />
       </div>
 
       <div className="rounded-md border border-hairline bg-panel p-5 mb-8">
@@ -108,68 +109,114 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="rounded-md border border-hairline bg-panel">
-        <div className="px-5 py-4 border-b border-hairline flex items-center justify-between">
-          <h2 className="font-medium text-paper text-sm">Recently updated</h2>
-          <Link to="/scripts" className="text-xs text-paper-faint hover:text-tide transition-colors">
-            View all →
-          </Link>
-        </div>
-        {stats.recent.length === 0 ? (
-          <div className="p-8 text-center text-paper-faint text-sm">
-            No scripts yet. Create your first one to get started.
+      <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-md border border-hairline bg-panel">
+          <div className="px-5 py-4 border-b border-hairline flex items-center justify-between">
+            <h2 className="font-medium text-paper text-sm">Recently updated</h2>
+            <Link to="/scripts" className="text-xs text-paper-faint hover:text-tide transition-colors">
+              View all →
+            </Link>
           </div>
-        ) : (
-          <ul className="divide-y divide-hairline">
-            {stats.recent.map((s) => {
-              const meta = statusMeta(s.status);
-              return (
-                <li key={s._id}>
-                  <Link
-                    to={`/scripts/${s._id}`}
-                    className="flex items-center justify-between px-5 py-3 hover:bg-panel-soft transition-colors"
-                  >
-                    <span className="text-sm text-paper">{s.title}</span>
-                    <span className="flex items-center gap-3">
-                      <span
-                        className="text-xs px-2 py-0.5 rounded-full font-mono"
-                        style={{
-                          color: meta.color,
-                          background: meta.color + "1a",
-                        }}
-                      >
-                        {meta.label}
+          {stats.recent.length === 0 ? (
+            <div className="p-8 text-center text-paper-faint text-sm">
+              No scripts yet. Create your first one to get started.
+            </div>
+          ) : (
+            <ul className="divide-y divide-hairline">
+              {stats.recent.map((s) => {
+                const meta = statusMeta(s.status);
+                return (
+                  <li key={s._id}>
+                    <Link
+                      to={`/scripts/${s._id}`}
+                      className="flex items-center justify-between px-5 py-3 hover:bg-panel-soft transition-colors"
+                    >
+                      <span className="text-sm text-paper truncate">{s.title}</span>
+                      <span className="flex items-center gap-3 shrink-0">
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full font-mono"
+                          style={{
+                            color: meta.color,
+                            background: meta.color + "1a",
+                          }}
+                        >
+                          {meta.label}
+                        </span>
+                        <span className="text-xs text-paper-faint font-mono tabular">
+                          {new Date(s.updatedAt).toLocaleDateString()}
+                        </span>
                       </span>
-                      <span className="text-xs text-paper-faint font-mono tabular">
-                        {new Date(s.updatedAt).toLocaleDateString()}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="rounded-md border border-hairline bg-panel">
+          <div className="px-5 py-4 border-b border-hairline flex items-center justify-between">
+            <h2 className="font-medium text-paper text-sm">Upcoming</h2>
+            <Link to="/calendar" className="text-xs text-paper-faint hover:text-tide transition-colors">
+              Calendar →
+            </Link>
+          </div>
+          {stats.upcoming.length === 0 ? (
+            <div className="p-8 text-center text-paper-faint text-sm">
+              Nothing scheduled. Set a publish date on a script to see it here.
+            </div>
+          ) : (
+            <ul className="divide-y divide-hairline">
+              {stats.upcoming.map((s) => {
+                const meta = statusMeta(s.status);
+                return (
+                  <li key={s._id}>
+                    <Link
+                      to={`/scripts/${s._id}`}
+                      className="flex items-center justify-between px-5 py-3 hover:bg-panel-soft transition-colors"
+                    >
+                      <span className="text-sm text-paper truncate">{s.title}</span>
+                      <span className="flex items-center gap-3 shrink-0">
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full font-mono"
+                          style={{
+                            color: meta.color,
+                            background: meta.color + "1a",
+                          }}
+                        >
+                          {meta.label}
+                        </span>
+                        <span className="text-xs text-tide font-mono tabular">
+                          {new Date(s.publishDate).toLocaleDateString()}
+                        </span>
                       </span>
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value }) {
+function StatCard({ label, value, accent }) {
   return (
     <div className="rounded-md border border-hairline bg-panel p-5">
       <div className="text-xs uppercase tracking-widest text-paper-faint font-mono mb-2">
         {label}
       </div>
-      <div className="text-3xl font-mono tabular text-paper">{value}</div>
+      <div className={`text-3xl font-mono tabular ${accent || "text-paper"}`}>{value}</div>
     </div>
   );
 }
 
 export function ErrorBanner({ error }) {
   return (
-    <div className="rounded-md border border-ember-dim/40 bg-ember-soft p-4 text-sm">
-      <div className="font-medium mb-1 text-ember">Couldn't reach the server</div>
+    <div className="rounded-md border border-flare-dim/40 bg-flare-soft p-4 text-sm">
+      <div className="font-medium mb-1 text-flare">Couldn't reach the server</div>
       <div className="text-paper-dim">
         Make sure the backend is running on port 5000 and MongoDB is connected. ({error})
       </div>

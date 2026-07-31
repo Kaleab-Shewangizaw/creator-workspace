@@ -1,9 +1,12 @@
 import { NavLink, Outlet } from "react-router-dom";
+import QuickCapture from "./QuickCapture.jsx";
 
 const navItems = [
   { to: "/", label: "Dashboard", mark: "01", end: true },
   { to: "/board", label: "Pipeline", mark: "02" },
-  { to: "/scripts", label: "Scripts", mark: "03" },
+  { to: "/calendar", label: "Calendar", mark: "03" },
+  { to: "/scripts", label: "Scripts", mark: "04" },
+  { to: "/channel", label: "Channel", mark: "05" },
 ];
 
 export default function Layout() {
@@ -15,8 +18,8 @@ export default function Layout() {
         <div className="pl-7 pr-5 py-5 border-b border-hairline">
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-ember opacity-40 animate-ping" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ember" />
+              <span className="absolute inline-flex h-full w-full rounded-full bg-flare opacity-50 animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-flare" />
             </span>
             <div>
               <div className="font-mono text-[13px] font-medium tracking-tight text-paper leading-tight">
@@ -38,7 +41,7 @@ export default function Layout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-panel text-paper"
+                    ? "bg-spark-soft text-paper"
                     : "text-paper-dim hover:bg-panel-soft hover:text-paper"
                 }`
               }
@@ -47,7 +50,7 @@ export default function Layout() {
                 <>
                   <span
                     className={`font-mono text-[10px] tabular ${
-                      isActive ? "text-ember" : "text-paper-faint"
+                      isActive ? "text-tide" : "text-paper-faint"
                     }`}
                   >
                     {item.mark}
@@ -64,8 +67,9 @@ export default function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative">
         <Outlet />
+        <QuickCapture />
       </main>
     </div>
   );

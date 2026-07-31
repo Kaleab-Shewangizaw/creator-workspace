@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getScripts, getTags, createScript, deleteScript } from "../api/client.js";
-import { STATUSES, statusMeta } from "../constants.js";
+import { STATUSES, statusMeta, checklistProgress } from "../constants.js";
 import { ErrorBanner } from "./Dashboard.jsx";
 
 export default function Scripts() {
@@ -51,7 +51,7 @@ export default function Scripts() {
         </div>
         <button
           onClick={handleNewScript}
-          className="rounded-md bg-ember hover:bg-ember-dim transition-colors px-4 py-2 text-sm font-medium text-ink"
+          className="rounded-md bg-spark hover:bg-spark-dim transition-colors px-4 py-2 text-sm font-semibold text-paper"
         >
           + New script
         </button>
@@ -105,6 +105,7 @@ export default function Scripts() {
           <ul className="divide-y divide-hairline">
             {scripts.map((s) => {
               const meta = statusMeta(s.status);
+              const progress = checklistProgress(s.notes);
               return (
                 <li key={s._id}>
                   <Link
@@ -127,6 +128,21 @@ export default function Scripts() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4 shrink-0">
+                      {s.publishDate && (
+                        <span className="text-xs text-tide font-mono tabular">
+                          {new Date(s.publishDate).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      )}
+                      <span
+                        className={`text-xs font-mono tabular ${
+                          progress.done === progress.total ? "text-zest" : "text-paper-faint"
+                        }`}
+                      >
+                        {progress.done}/{progress.total}
+                      </span>
                       <span className="text-xs text-paper-faint font-mono tabular">
                         {s.wordCount || 0} words
                       </span>
@@ -141,7 +157,7 @@ export default function Scripts() {
                       </span>
                       <button
                         onClick={(e) => handleDelete(e, s._id)}
-                        className="opacity-0 group-hover:opacity-100 text-paper-faint hover:text-ember text-xs transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 text-paper-faint hover:text-flare text-xs transition-opacity"
                       >
                         Delete
                       </button>

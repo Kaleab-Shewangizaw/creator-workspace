@@ -12,4 +12,7 @@ export const createScript = (data) => api.post("/scripts", data).then((r) => r.d
 export const updateScript = (id, data) => api.put(`/scripts/${id}`, data).then((r) => r.data);
 export const deleteScript = (id) => api.delete(`/scripts/${id}`).then((r) => r.data);
 
+export const getChannel = () => api.get("/channel").then((r) => r.data);
+export const updateChannel = (data) => api.put("/channel", data).then((r) => r.data);
+
 export default api;

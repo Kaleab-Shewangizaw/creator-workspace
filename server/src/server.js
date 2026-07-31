@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import scriptsRouter from "./routes/scripts.js";
+import channelRouter from "./routes/channel.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/scripts", scriptsRouter);
+app.use("/api/channel", channelRouter);
 
 mongoose
   .connect(MONGODB_URI)

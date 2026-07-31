@@ -8,11 +8,19 @@ to each script. Runs entirely on your machine — nothing leaves localhost.
 
 ## Features
 
-- **Dashboard** — total scripts, word counts, and what's in progress at a glance
+- **Dashboard** — total scripts, word counts, publish-readiness, and what's
+  in progress or coming up at a glance
 - **Pipeline board** — drag scripts across Idea → Outline → Draft → Recording → Published
+- **Calendar** — a month view of publish dates, plus a quick way to schedule
+  anything still unscheduled
 - **Scripts list** — search and filter by stage or tag
-- **Editor** — distraction-free writing with autosave, live word count, and a
-  notes panel for title ideas, thumbnail notes, SEO tags, and hooks
+- **Editor** — distraction-free writing with autosave, live word count, a
+  publish date, and a notes panel for title ideas, thumbnail notes, SEO tags,
+  hooks, description/chapters, and a publish checklist
+- **Quick capture** — press `C` (or hit the floating button) from anywhere to
+  jot a new idea without leaving what you're doing
+- **Channel** — one home for channel identity: name, tagline, niche, content
+  pillars, target audience, upload cadence, and social links
 
 ## 1. Install MongoDB locally
 
@@ -63,15 +71,18 @@ backend automatically (see `client/vite.config.js`).
 creator-workspace/
 ├── server/               Express API
 │   ├── src/
-│   │   ├── models/Script.js      Mongoose schema
-│   │   ├── routes/scripts.js     CRUD + stats + tags endpoints
+│   │   ├── models/Script.js       Mongoose schema
+│   │   ├── models/Channel.js      singleton channel-profile schema
+│   │   ├── routes/scripts.js      CRUD + stats + tags endpoints
+│   │   ├── routes/channel.js      channel profile GET/PUT
 │   │   └── server.js              app entry point
 │   └── .env                       MONGODB_URI / PORT
 └── client/               React app (Vite + Tailwind)
     └── src/
-        ├── api/client.js          axios wrapper for the API
-        ├── components/Layout.jsx  sidebar navigation
-        └── pages/                 Dashboard, Board, Scripts, Editor
+        ├── api/client.js              axios wrapper for the API
+        ├── components/Layout.jsx      sidebar navigation
+        ├── components/QuickCapture.jsx  floating idea-capture modal
+        └── pages/                     Dashboard, Board, Calendar, Scripts, Editor, Channel
 ```
 
 ## API reference
@@ -80,11 +91,13 @@ creator-workspace/
 | ------ | --------------------- | ------------------------------------ |
 | GET    | `/api/scripts`        | list scripts (`?search=&status=&tag=`) |
 | GET    | `/api/scripts/tags`   | distinct tag list                    |
-| GET    | `/api/scripts/stats`  | dashboard aggregates                 |
+| GET    | `/api/scripts/stats`  | dashboard aggregates (incl. `upcoming`, `readyToPublish`) |
 | GET    | `/api/scripts/:id`    | fetch one script                     |
 | POST   | `/api/scripts`        | create a script                      |
-| PUT    | `/api/scripts/:id`    | update a script                      |
+| PUT    | `/api/scripts/:id`    | update a script (`publishDate`, `notes.description`, `notes.checklist`, etc.) |
 | DELETE | `/api/scripts/:id`    | delete a script                      |
+| GET    | `/api/channel`        | fetch the channel profile (auto-created on first access) |
+| PUT    | `/api/channel`        | update the channel profile           |
 
 ## Customizing
 
