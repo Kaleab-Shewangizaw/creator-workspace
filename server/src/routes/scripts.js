@@ -1,5 +1,5 @@
 import { Router } from "express";
-import Script, { STATUS_VALUES } from "../models/Script.js";
+import Script, { STATUS_VALUES, countWords } from "../models/Script.js";
 
 const router = Router();
 
@@ -41,10 +41,7 @@ router.get("/stats", async (req, res) => {
   try {
     const scripts = await Script.find();
     const totalScripts = scripts.length;
-    const totalWords = scripts.reduce((sum, s) => {
-      const words = s.content ? s.content.trim().split(/\s+/).filter(Boolean).length : 0;
-      return sum + words;
-    }, 0);
+    const totalWords = scripts.reduce((sum, s) => sum + countWords(s.content), 0);
 
     const byStatus = STATUS_VALUES.reduce((acc, status) => {
       acc[status] = scripts.filter((s) => s.status === status).length;

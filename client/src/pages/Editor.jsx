@@ -1,7 +1,15 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getScript, updateScript, deleteScript } from "../api/client.js";
-import { STATUSES, estimateRuntime, DEFAULT_CHECKLIST, checklistProgress } from "../constants.js";
+import {
+  STATUSES,
+  estimateRuntime,
+  DEFAULT_CHECKLIST,
+  checklistProgress,
+  CUE_TYPES,
+  splitCues,
+  stripCues,
+} from "../constants.js";
 import { ErrorBanner } from "./Dashboard.jsx";
 
 const SAVE_DELAY = 800;
@@ -19,6 +27,8 @@ export default function Editor() {
 
   const saveTimer = useRef(null);
   const latest = useRef(null);
+  const contentRef = useRef(null);
+  const backdropRef = useRef(null);
 
   useEffect(() => {
     setScript(null);
@@ -121,6 +131,32 @@ export default function Editor() {
     updateNotes("checklist", checklistItems().filter((_, idx) => idx !== i));
   }
 
+  function insertCue(cue) {
+    const el = contentRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const content = script.content || "";
+    const before = content.slice(0, start);
+    const after = content.slice(end);
+    const needsSpaceBefore = before.length > 0 && !/\s$/.test(before);
+    const insertText = (needsSpaceBefore ? " " : "") + cue.insert;
+    update("content", before + insertText + after);
+    const caretOffset = cue.hasPayload ? insertText.length - 1 : insertText.length;
+    const pos = before.length + caretOffset;
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(pos, pos);
+    });
+  }
+
+  function syncScroll() {
+    if (backdropRef.current && contentRef.current) {
+      backdropRef.current.scrollTop = contentRef.current.scrollTop;
+      backdropRef.current.scrollLeft = contentRef.current.scrollLeft;
+    }
+  }
+
   async function handleDelete() {
     if (!confirm("Delete this script? This can't be undone.")) return;
     await deleteScript(id);
@@ -139,7 +175,7 @@ export default function Editor() {
     return <div className="p-10 text-paper-faint font-mono text-sm">Loading script…</div>;
   }
 
-  const wordCount = (script.content || "").trim().split(/\s+/).filter(Boolean).length;
+  const wordCount = stripCues(script.content).trim().split(/\s+/).filter(Boolean).length;
   const meta = STATUSES.find((s) => s.value === script.status) || STATUSES[0];
   const progress = checklistProgress(script.notes);
 
@@ -238,12 +274,51 @@ export default function Editor() {
             </div>
           </div>
 
-          <textarea
-            value={script.content}
-            onChange={(e) => update("content", e.target.value)}
-            placeholder="Start writing your script…"
-            className="flex-1 w-full resize-none bg-transparent text-paper font-mono leading-[1.8] text-[15px] tracking-[0.01em] placeholder:text-paper-faint/50"
-          />
+          <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-paper-faint mr-0.5">
+              Cues
+            </span>
+            {CUE_TYPES.map((cue) => (
+              <button
+                key={cue.key}
+                type="button"
+                onClick={() => insertCue(cue)}
+                title={cue.hint}
+                className={`text-xs font-mono px-2 py-1 rounded-full border transition-colors ${cue.chipClass}`}
+              >
+                {cue.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative flex-1 min-h-0">
+            <div
+              ref={backdropRef}
+              aria-hidden="true"
+              className="no-scrollbar absolute inset-0 overflow-auto whitespace-pre-wrap wrap-break-word font-mono leading-[1.8] text-[15px] tracking-[0.01em] text-paper pb-[50vh]"
+            >
+              {splitCues(script.content).map((part, i) =>
+                part.cue ? (
+                  <span
+                    key={i}
+                    className={`${part.cue.bgClass} ${part.cue.textClass} rounded px-1 font-sans font-semibold`}
+                  >
+                    {part.raw}
+                  </span>
+                ) : (
+                  <span key={i}>{part.text}</span>
+                )
+              )}
+            </div>
+            <textarea
+              ref={contentRef}
+              value={script.content}
+              onChange={(e) => update("content", e.target.value)}
+              onScroll={syncScroll}
+              placeholder="Start writing your script…"
+              className="no-scrollbar absolute inset-0 w-full h-full resize-none bg-transparent text-transparent caret-paper font-mono leading-[1.8] text-[15px] tracking-[0.01em] placeholder:text-paper-faint/50 pb-[50vh]"
+            />
+          </div>
         </div>
       </div>
 

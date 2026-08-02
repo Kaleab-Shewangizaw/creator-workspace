@@ -12,6 +12,15 @@ export const DEFAULT_CHECKLIST = [
   "Pinned comment drafted",
 ];
 
+// Delivery cues writers drop inline (e.g. [LOUD], [SPEAKER: name]) — these
+// are directions, not spoken words, so word/runtime counts exclude them.
+const CUE_PATTERN = /\[(LOUD|PAUSE|SPEAKER:[^\]]*|SFX:[^\]]*)\]/gi;
+
+export function countWords(content) {
+  if (!content) return 0;
+  return content.replace(CUE_PATTERN, " ").trim().split(/\s+/).filter(Boolean).length;
+}
+
 const scriptSchema = new mongoose.Schema(
   {
     title: {
@@ -53,8 +62,7 @@ const scriptSchema = new mongoose.Schema(
 );
 
 scriptSchema.virtual("wordCount").get(function () {
-  if (!this.content) return 0;
-  return this.content.trim().split(/\s+/).filter(Boolean).length;
+  return countWords(this.content);
 });
 
 scriptSchema.set("toJSON", { virtuals: true });
