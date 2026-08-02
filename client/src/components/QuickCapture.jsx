@@ -61,7 +61,7 @@ export default function QuickCapture() {
       <button
         onClick={() => setOpen(true)}
         title="Quick capture an idea (press C)"
-        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-spark text-paper text-2xl leading-none transition-transform hover:scale-105 hover:bg-spark-dim"
+        className="fixed bottom-6 left-64 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-spark text-paper text-2xl leading-none transition-transform hover:scale-105 hover:bg-spark-dim"
       >
         +
       </button>

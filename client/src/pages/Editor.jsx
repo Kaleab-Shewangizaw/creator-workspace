@@ -11,6 +11,7 @@ import {
   stripCues,
 } from "../constants.js";
 import { ErrorBanner } from "./Dashboard.jsx";
+import VoiceRecorder from "../components/VoiceRecorder.jsx";
 
 const SAVE_DELAY = 800;
 
@@ -324,6 +325,10 @@ export default function Editor() {
 
       {showNotes && (
         <aside className="w-80 shrink-0 border-l border-hairline bg-panel-soft overflow-y-auto p-6 space-y-7">
+          <div className="pb-7 border-b border-hairline">
+            <VoiceRecorder scriptId={id} scriptTitle={script.title} scriptContent={script.content} />
+          </div>
+
           <div>
             <h3 className="font-mono text-[10px] font-medium text-paper-faint uppercase tracking-widest mb-2">
               Title ideas

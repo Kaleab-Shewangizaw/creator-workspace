@@ -1,5 +1,9 @@
 import { Router } from "express";
+import fs from "fs";
+import path from "path";
 import Script, { STATUS_VALUES, countWords } from "../models/Script.js";
+import Recording from "../models/Recording.js";
+import { UPLOAD_DIR } from "./recordings.js";
 
 const router = Router();
 
@@ -121,6 +125,13 @@ router.delete("/:id", async (req, res) => {
   try {
     const script = await Script.findByIdAndDelete(req.params.id);
     if (!script) return res.status(404).json({ error: "Script not found" });
+
+    const recordings = await Recording.find({ script: req.params.id });
+    await Recording.deleteMany({ script: req.params.id });
+    for (const recording of recordings) {
+      fs.unlink(path.join(UPLOAD_DIR, recording.filename), () => {});
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
